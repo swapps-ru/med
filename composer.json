@@ -11,7 +11,9 @@
         "guzzlehttp/guzzle": "^7.0.1",
         "laravel/framework": "^8.40",
         "laravel/jetstream": "^2.3",
-        "laravel/tinker": "^2.5"
+        "laravel/sanctum": "^2.6",
+        "laravel/tinker": "^2.5",
+        "livewire/livewire": "^2.5"
     },
     "require-dev": {
         "facade/ignition": "^2.5",
@@ -36,13 +38,13 @@
     "scripts": {
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "/opt/php73/bin/php artisan package:discover --ansi"
+            "@php artisan package:discover --ansi"
         ],
         "post-root-package-install": [
-            "/opt/php73/bin/php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
         ],
         "post-create-project-cmd": [
-            "/opt/php73/bin/php artisan key:generate --ansi"
+            "@php artisan key:generate --ansi"
         ]
     },
     "extra": {
@@ -53,10 +55,7 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true,
-		 "platform": {
-			"php": "7.3.16"
-		}
+        "sort-packages": true
     },
     "minimum-stability": "dev",
     "prefer-stable": true
