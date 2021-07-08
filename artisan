@@ -1,4 +1,4 @@
-#!/usr/bin/env /opt/php73/bin/php
+#!/usr/bin/env php
 <?php
 
 define('LARAVEL_START', microtime(true));
