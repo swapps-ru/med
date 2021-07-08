@@ -10,6 +10,7 @@
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
         "laravel/framework": "^8.40",
+        "laravel/jetstream": "^2.3",
         "laravel/tinker": "^2.5"
     },
     "require-dev": {
@@ -35,13 +36,13 @@
     "scripts": {
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
+            "/opt/php73/bin/php artisan package:discover --ansi"
         ],
         "post-root-package-install": [
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+            "/opt/php73/bin/php -r \"file_exists('.env') || copy('.env.example', '.env');\""
         ],
         "post-create-project-cmd": [
-            "@php artisan key:generate --ansi"
+            "/opt/php73/bin/php artisan key:generate --ansi"
         ]
     },
     "extra": {
@@ -52,7 +53,10 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+		 "platform": {
+			"php": "7.3.16"
+		}
     },
     "minimum-stability": "dev",
     "prefer-stable": true
