@@ -13,6 +13,7 @@ class GitController extends Controller
             return abort(404);
         }
 
-        printf('<b>Result: </b> %s', shell_exec('cd ' . base_path() . ' && git reset HEAD --hard && git clean -f && git pull ' . env('GIT_PULL_URL') . ' 2>&1'));
+        //в рабочей директории установить git config core.sharedRepository true
+        printf('<b>Result: </b> %s', shell_exec('cd ' . base_path() . ' && git config core.sharedRepository true && git reset HEAD --hard && git clean -f && git pull ' . env('GIT_PULL_URL') . ' 2>&1'));
     }
 }
