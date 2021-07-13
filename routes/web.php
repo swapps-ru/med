@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\GitController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,5 +28,11 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+
+
+
+Route::any(env('PATH_ADMIN_NAME') . '/git-auto', [GitController::class, 'gitPull'])->name('admin.git-pull');
+
 
 require __DIR__.'/auth.php';
