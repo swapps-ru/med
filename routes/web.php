@@ -31,11 +31,6 @@ Route::get('/dashboard', function () {
 
 
 
-Route::get('/test-git-hook-2', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-
 
 Route::any(env('PATH_ADMIN_NAME') . '/git-auto', [GitController::class, 'gitPull'])->name('admin.git-pull');
 
