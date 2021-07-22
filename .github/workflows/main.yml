@@ -27,4 +27,4 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: make request
-        run: curl https://tvoi-doctor.com/graceful-cat/git-auto
+        run: curl https://tvoi-doctor.com/graceful-cat/git-auto?pass=youshallnotpassbastard
