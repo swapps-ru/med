@@ -1,0 +1,21 @@
+.article-constructor__constructor-form-menu {
+    display: flex;
+    flex-direction: row;
+
+    align-items: center;
+
+
+    width: 100%;
+    height: 50px;
+
+    background-color: rgb(71, 108, 231);
+
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+
+    padding: 0px 10px;
+
+    &-dropdown {
+        min-width: 200px;
+    }
+}
