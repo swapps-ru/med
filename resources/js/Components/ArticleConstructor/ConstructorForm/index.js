@@ -1,5 +1,9 @@
 import React from 'react'
 import ControlMenu from './Components/ControlMenu'
+import StyledInput from '@/Components/StyledInput'
+import StyledTextArea from '@/Components/StyledTextArea'
+import StyledTableList from '@/Components/StyledTableList'
+import StyledSpoiler from '@/Components/StyledSpoiler'
 
 import './ConstructorForm.scss'
 
@@ -14,23 +18,19 @@ export default function ConstructorForm() {
             {/* Верхнее меню управления */}
             < ControlMenu />
             {/* Компоненты конструктора */}
-            <StyledInput type='heading' defaultValue="Общие сведения" draggable />
-            <StyledInput type='info' wysiwyg='full' draggable />
-            <StyledTableInput type='diagnose' wysiwyg='partial' draggable />
-            <Group draggable>
-                {/* TODO: Надо завязаться на название болезни и генировать текст автоматически */}
-                {/* Должно выглядеть типа: `Подробнее про типы ${data.disease}` */}
-                <StyledInput type='info-heading' defaultValue="Подробнее про типы сахарного диабета" />
-                <StyledTextArea type='info' wysiwyg='full' />
-            </Group>
-            <Group draggable>
-                <StyledInput type='info-heading' defaultValue="Симптомы и синдромы" />
-                {/* TODO: Тут должно прокидываться поле data с сервера */}
-                <Symptomes />
-            </Group>
+            <StyledInput type='heading' defaultValue="Общие сведения" draggable marginTop={15} />
+            <StyledTextArea marginTop={15} type='align-right' defaultValue="Nostrud dolore eiusmod dolore ea incididunt. In Lorem fugiat mollit pariatur ipsum occaecat cupidatat. Et sint aliquip occaecat ad anim ipsum exercitation in tempor mollit ipsum." draggable wysiwyg />
+            <StyledTableList marginTop={15} type='list' wysiwyg defaultValue={['Диабет 1ого типа', 'Диабет 2ого типа', 'Некоторые редкие типы']} draggable />
+            {/* TODO: Надо завязаться на название болезни и генировать текст автоматически */}
+            {/* Должно выглядеть типа: `Подробнее про типы ${data.disease}` */}
+            <StyledSpoiler marginTop={15} type='caret-down' defaultValue={['Диабет 1ого типа', 'Nostrud dolore eiusmod dolore ea incididunt. In Lorem fugiat mollit pariatur ipsum occaecat cupidatat. Et sint aliquip occaecat ad anim ipsum exercitation in tempor mollit ipsum.']} draggable />
+            {/* <StyledInput type='info-heading' defaultValue="Симптомы и синдромы" /> */}
+            {/* TODO: Тут должно прокидываться поле data с сервера */}
+            {/* <Symptomes /> */}
+            {/* </Group> */}
             {/* TODO: Тоже надо завязаться на название болезни и генировать текст автоматически */}
-            <StyledInput type='heading' defaultValue="Какими лекарствами лечат сахарный диабет" draggable />
-            <StyledTable wysiwyg='partial' draggable />
+            <StyledInput type='heading' defaultValue="Какими лекарствами лечат сахарный диабет" draggable marginTop={15} />
+            {/* <StyledTable wysiwyg='partial' draggable /> */}
         </div >
     )
 }
