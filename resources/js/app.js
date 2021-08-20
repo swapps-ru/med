@@ -9,6 +9,11 @@ import { InertiaProgress } from '@inertiajs/progress';
 import { Provider } from 'react-redux'
 import store from './Store'
 
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faHeading, faAlignRight, faList, faCaretDown } from '@fortawesome/free-solid-svg-icons'
+
+library.add(faHeading, faAlignRight, faList, faCaretDown)
+
 const el = document.getElementById('app');
 
 render(
