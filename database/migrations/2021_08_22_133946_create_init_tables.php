@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Carbon\Carbon;
 
 class CreateInitTables extends Migration
 {
@@ -77,7 +78,8 @@ class CreateInitTables extends Migration
             $table->string('names')->nullable();
             $table->string('names_scientific')->nullable();
 
-            $table->string('symptom_ids')->nullable();
+            $table->string('symptom_include_ids')->nullable();
+
             $table->string('diseases_add_ids')->nullable();
 
             $table->integer('wordstat_queries')->default(0)->unsigned();
@@ -94,7 +96,7 @@ class CreateInitTables extends Migration
             $table->string('icon_class')->nullable();
 
             $table->string('body_part_ids')->nullable();
-            $table->string('options_default_json')->nullable();
+            $table->text('options_default_json')->nullable(); //какие "уточнения" симптома добавлять по-умолчанию в конструкторе
 
             $table->enum('type', ['pain', 'blood_test', 'measured', 'visual', 'other'])->default('other');
 
@@ -222,15 +224,35 @@ class CreateInitTables extends Migration
 
 
         $symptoms = array_merge($this->getSymptomsParsed(), $this->getBloodTestsParsed());
-        foreach($symptoms as &$symptom)
-        {
-            if(isset($symptom['names_scientific']) && empty($symptom['names_scientific']))
-            {
+        foreach ($symptoms as &$symptom) {
+            $symptom['wordstat_query_names'] = trim($symptom['names'] . ', ' . $symptom['names_scientific'], ' ,');
+
+            $symptom['created_at'] = Carbon::now();
+            $symptom['updated_at'] = Carbon::now();
+
+            if (empty($symptom['names_scientific'])) {
                 $symptom['names_scientific'] = null;
             }
         }
 
         DB::table('symptoms')->insert($symptoms);
+
+
+        $symptomes_ids = [];
+        $symptomes_ids[] = DB::table('symptoms')->select('id')->where('names', 'like', '%Боль в пояснице%')->first()->id;
+        $symptomes_ids[] = DB::table('symptoms')->select('id')->where('names', 'like', '%Онемение%')->first()->id;
+        $symptomes_ids[] = DB::table('symptoms')->select('id')->where('names', 'like', '%Мышечная слабость%')->first()->id;
+
+        DB::table('syndromes')->insert(['names' => 'Радикулярный синдром', 'created_at' => Carbon::now(), 'symptom_include_ids' => implode(',', $symptomes_ids)]);
+
+        $symptomes_ids = [];
+        $symptomes_ids[] = DB::table('symptoms')->select('id')->where('names', 'like', '%Кровь в моче%')->first()->id;
+        $symptomes_ids[] = DB::table('symptoms')->select('id')->where('names', 'like', '%Отеки ног%')->first()->id;
+        $symptomes_ids[] = DB::table('symptoms')->select('id')->where('names', 'like', '%Отеки рук%')->first()->id;
+        $symptomes_ids[] = DB::table('symptoms')->select('id')->where('names', 'like', '%Отеки лица%')->first()->id;
+        $symptomes_ids[] = DB::table('symptoms')->select('id')->where('names_scientific', 'like', '%Анурия%')->first()->id;
+
+        DB::table('syndromes')->insert(['names' => 'Нефртический синдром', 'created_at' => Carbon::now(), 'symptom_include_ids' => implode(',', $symptomes_ids)]);
     }
 
     /**
@@ -351,6 +373,10 @@ class CreateInitTables extends Migration
             if (!empty($row['locations'])) {
                 //если есть локализация делаем набор сочетаний основного симптома и локализаций
 
+                if (!empty($row['options'])) {
+                    $row['options'] = array_merge([''], $row['options']); //чтобы был вариант без характера, только симптом + локализация
+                }
+
                 foreach ($row['locations'] as $location) {
                     $letter_first_location = mb_substr($location, 0, 1);
                     $is_first_upper_location = (mb_strtolower($letter_first_location) !== $letter_first_location);
@@ -419,8 +445,7 @@ class CreateInitTables extends Migration
                         ];
                     }
                 }
-            }
-            else if (empty($row['locations']) && !empty($row['options'])) {
+            } else if (empty($row['locations']) && !empty($row['options'])) {
                 //просто добавляем специфику симптомов, если нет локализаций
 
                 foreach ($row['options'] as $option) {
@@ -460,7 +485,8 @@ class CreateInitTables extends Migration
         return $list_symptoms;
     }
 
-    public function getBloodTestsParsed() {
+    public function getBloodTestsParsed()
+    {
         $list = file_get_contents(storage_path('app/') . '/blood_test_list_start.txt', true);
         $rows = explode("\n", $list);
         $rows_new = [];
