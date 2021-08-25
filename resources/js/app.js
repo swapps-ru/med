@@ -1,7 +1,7 @@
 require('./bootstrap');
 
 // Import modules...
-import React from 'react';
+import React, { useCallback } from 'react';
 import { render } from 'react-dom';
 import { App } from '@inertiajs/inertia-react';
 import { InertiaProgress } from '@inertiajs/progress';

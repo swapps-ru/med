@@ -1,36 +1,70 @@
-import React from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
+import { Droppable } from 'react-beautiful-dnd';
 import ControlMenu from './Components/ControlMenu'
-import StyledInput from '@/Components/StyledInput'
-import StyledTextArea from '@/Components/StyledTextArea'
-import StyledTableList from '@/Components/StyledTableList'
-import StyledSpoiler from '@/Components/StyledSpoiler'
+import { DragDropContext } from 'react-beautiful-dnd';
+import BlockConstructor from '@/Components/BlockConstructor'
 
 import './ConstructorForm.scss'
 
+const defaultItems = [
+    { type: 'heading', defaultValue: 'Общие сведения', draggable: true },
+    { type: 'text-area', defaultValue: 'Nostrud dolore eiusmod dolore ea incididunt. In Lorem fugiat mollit pariatur ipsum occaecat cupidatat. Et sint aliquip occaecat ad anim ipsum exercitation in tempor mollit ipsum.', draggable: true, wysiwyg: true },
+    { type: 'list', defaultValue: ['Диабет 1ого типа', 'Диабет 2ого типа', 'Некоторые редкие типы'], draggable: true, wysiwyg: true },
+    { type: 'spoiler', defaultValue: ['Диабет 1ого типа', 'Nostrud dolore eiusmod dolore ea incididunt. In Lorem fugiat mollit pariatur ipsum occaecat cupidatat. Et sint aliquip occaecat ad anim ipsum exercitation in tempor mollit ipsum.'], draggable: true, wysiwyg: true },
+    { type: 'heading', defaultValue: "Какими лекарствами лечат сахарный диабет", draggable: true },
+];
+
+const reorder = (list, startIndex, endIndex) => {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+
+    return result;
+};
+
 export default function ConstructorForm() {
+    const [items, setItems] = useState(defaultItems);
+
+    useEffect(() => {
+        console.log(items);
+    }, [items])
+
+    const onDragEnd = useCallback((data) => {
+        if (!data.destination) {
+            return;
+        }
+
+        const result = reorder(
+            items,
+            data.source.index,
+            data.destination.index
+        );
+
+        setItems(result);
+    }, []);
+
     return (
-        // FIXME: Пока перетаскивание не работает, нужно чинить, подозреваю, что эта либа не умеет работать с
-        // реактом
-        // Придумал, как просто и быстро написать это самому, в процессе
-        //
         // TODO: Нужно завязаться на данные про порядок блоков с сервера, пока данные не готовы - хардкожу
-        <div className="article-constructor__constructor-form" >
-            {/* Верхнее меню управления */}
-            < ControlMenu />
-            {/* Компоненты конструктора */}
-            <StyledInput type='heading' defaultValue="Общие сведения" draggable marginTop={15} />
-            <StyledTextArea marginTop={15} type='align-right' defaultValue="Nostrud dolore eiusmod dolore ea incididunt. In Lorem fugiat mollit pariatur ipsum occaecat cupidatat. Et sint aliquip occaecat ad anim ipsum exercitation in tempor mollit ipsum." draggable wysiwyg />
-            <StyledTableList marginTop={15} type='list' wysiwyg defaultValue={['Диабет 1ого типа', 'Диабет 2ого типа', 'Некоторые редкие типы']} draggable />
-            {/* TODO: Надо завязаться на название болезни и генировать текст автоматически */}
-            {/* Должно выглядеть типа: `Подробнее про типы ${data.disease}` */}
-            <StyledSpoiler marginTop={15} type='caret-down' defaultValue={['Диабет 1ого типа', 'Nostrud dolore eiusmod dolore ea incididunt. In Lorem fugiat mollit pariatur ipsum occaecat cupidatat. Et sint aliquip occaecat ad anim ipsum exercitation in tempor mollit ipsum.']} draggable />
-            {/* <StyledInput type='info-heading' defaultValue="Симптомы и синдромы" /> */}
-            {/* TODO: Тут должно прокидываться поле data с сервера */}
-            {/* <Symptomes /> */}
-            {/* </Group> */}
-            {/* TODO: Тоже надо завязаться на название болезни и генировать текст автоматически */}
-            <StyledInput type='heading' defaultValue="Какими лекарствами лечат сахарный диабет" draggable marginTop={15} />
-            {/* <StyledTable wysiwyg='partial' draggable /> */}
-        </div >
+        <DragDropContext
+            onDragEnd={onDragEnd}
+        >
+            <Droppable droppableId="ConstructorForm">
+                {(provided, snapshot) => (
+                    <div className="article-constructor__constructor-form"
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                    >
+                        {/* Верхнее меню управления */}
+                        < ControlMenu />
+                        {/* Компоненты конструктора */}
+
+                        {items.map((item, i) => (
+                            <BlockConstructor {...item} index={i} id={`item-${i}`} key={`item-${i}`} />
+                        ))}
+                        {provided.placeholder}
+                    </div >
+                )}
+            </Droppable>
+        </DragDropContext>
     )
 }
