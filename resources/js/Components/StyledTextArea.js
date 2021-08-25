@@ -37,23 +37,6 @@ const StyledTextArea = ({ defaultValue, type, marginTop, wysiwyg, id, index, dra
         editor.current && editor.current.focus();
     };
 
-<<<<<<< HEAD:resources/js/Components/StyledTextArea.js
-    return (
-        <div className='editor' onClick={focus} style={{ marginTop }}>
-    {type && <FontAwesomeIcon className='icon' icon={type} />}
-    <Editor
-        editorKey="StyledTextArea"
-        editorState={editorState}
-        onChange={onChange}
-        plugins={plugins}
-        ref={(element) => {
-        editor.current = element;
-    }}
-        />
-        {wysiwyg && <InlineToolbar />}
-    </div>
-    );
-=======
     const textarea = <div
         className='editor'
         onClick={focus}
@@ -86,7 +69,6 @@ const StyledTextArea = ({ defaultValue, type, marginTop, wysiwyg, id, index, dra
         </Draggable>
         : textarea;
     ;
->>>>>>> drag alpha v.0.0.1:resources/js/Components/StyledTextarea.js
 };
 
 export default StyledTextArea;
