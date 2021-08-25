@@ -11,8 +11,9 @@ import createInlineToolbarPlugin from '@draft-js-plugins/inline-toolbar';
 import editorStyles from './editorStyles.scss';
 import '@draft-js-plugins/inline-toolbar/lib/plugin.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Draggable } from 'react-beautiful-dnd';
 
-const StyledTextArea = ({ defaultValue, type, marginTop, wysiwyg }) => {
+const StyledTextArea = ({ defaultValue, type, marginTop, wysiwyg, id, index, draggable }) => {
     const [plugins, InlineToolbar] = useMemo(() => {
         const inlineToolbarPlugin = createInlineToolbarPlugin();
         return [wysiwyg ? [inlineToolbarPlugin] : [], inlineToolbarPlugin.InlineToolbar];
@@ -36,6 +37,7 @@ const StyledTextArea = ({ defaultValue, type, marginTop, wysiwyg }) => {
         editor.current && editor.current.focus();
     };
 
+<<<<<<< HEAD:resources/js/Components/StyledTextArea.js
     return (
         <div className='editor' onClick={focus} style={{ marginTop }}>
     {type && <FontAwesomeIcon className='icon' icon={type} />}
@@ -51,6 +53,40 @@ const StyledTextArea = ({ defaultValue, type, marginTop, wysiwyg }) => {
         {wysiwyg && <InlineToolbar />}
     </div>
     );
+=======
+    const textarea = <div
+        className='editor'
+        onClick={focus}
+        style={{ marginTop }}
+    >
+        {type && <FontAwesomeIcon className='icon' icon={type} />}
+        <Editor
+            editorKey="StyledTextArea"
+            editorState={editorState}
+            onChange={onChange}
+            plugins={plugins}
+            ref={(element) => {
+                editor.current = element;
+            }}
+        />
+        {wysiwyg && <InlineToolbar />}
+    </div>;
+
+    return draggable ?
+        <Draggable draggableId={id} index={index}>
+            {(provided, snapshot) => (
+                <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                >
+                    {textarea}
+                </div>
+            )}
+        </Draggable>
+        : textarea;
+    ;
+>>>>>>> drag alpha v.0.0.1:resources/js/Components/StyledTextarea.js
 };
 
 export default StyledTextArea;
