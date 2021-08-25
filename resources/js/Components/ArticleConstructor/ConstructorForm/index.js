@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { Component } from 'react'
 import { Droppable } from 'react-beautiful-dnd';
 import ControlMenu from './Components/ControlMenu'
 import { DragDropContext } from 'react-beautiful-dnd';
@@ -22,49 +22,55 @@ const reorder = (list, startIndex, endIndex) => {
     return result;
 };
 
-export default function ConstructorForm() {
-    const [items, setItems] = useState(defaultItems);
+export default class ConstructorForm extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            items: defaultItems
+        };
+        this.onDragEnd = this.onDragEnd.bind(this);
+    }
 
-    useEffect(() => {
-        console.log(items);
-    }, [items])
-
-    const onDragEnd = useCallback((data) => {
+    onDragEnd(data) {
         if (!data.destination) {
             return;
         }
 
-        const result = reorder(
-            items,
+        const items = reorder(
+            this.state.items,
             data.source.index,
             data.destination.index
         );
 
-        setItems(result);
-    }, []);
+        this.setState({
+            items
+        });
+    };
 
-    return (
-        // TODO: Нужно завязаться на данные про порядок блоков с сервера, пока данные не готовы - хардкожу
-        <DragDropContext
-            onDragEnd={onDragEnd}
-        >
-            <Droppable droppableId="ConstructorForm">
-                {(provided, snapshot) => (
-                    <div className="article-constructor__constructor-form"
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                    >
-                        {/* Верхнее меню управления */}
-                        < ControlMenu />
-                        {/* Компоненты конструктора */}
+    render() {
+        return (
+            // TODO: Нужно завязаться на данные про порядок блоков с сервера, пока данные не готовы - хардкожу
+            <DragDropContext
+                onDragEnd={this.onDragEnd}
+            >
+                <Droppable droppableId="ConstructorForm">
+                    {(provided, snapshot) => (
+                        <div className="article-constructor__constructor-form"
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                        >
+                            {/* Верхнее меню управления */}
+                            < ControlMenu />
+                            {/* Компоненты конструктора */}
 
-                        {items.map((item, i) => (
-                            <BlockConstructor {...item} index={i} id={`item-${i}`} key={`item-${i}`} />
-                        ))}
-                        {provided.placeholder}
-                    </div >
-                )}
-            </Droppable>
-        </DragDropContext>
-    )
+                            {this.state.items.map((item, i) => (
+                                <BlockConstructor {...item} index={i} id={`item-${i}`} key={`item-${i}`} />
+                            ))}
+                            {provided.placeholder}
+                        </div >
+                    )}
+                </Droppable>
+            </DragDropContext>
+        )
+    }
 }

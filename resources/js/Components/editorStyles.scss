@@ -10,9 +10,13 @@
 
     // margin-top: 15px;
 
-    max-width: 90%;
+    // max-width: 90%;
 
     .icon {
         margin-right: 10px;
+
+        cursor: grab!important;
     }
+
+    cursor: default!important;
 }
