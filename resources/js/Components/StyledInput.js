@@ -47,14 +47,13 @@ const StyledInput = ({ defaultValue, type, wysiwyg, marginTop, id, index, dragga
         editor.current && editor.current.focus();
     };
 
-    const input = <div
+    const html = <div
         className='editor'
         onClick={focus}
         style={{ marginTop }}
     >
-        {type && <FontAwesomeIcon className='icon' icon={type} />}
         <Editor
-            editorKey="StyledInput"
+            editorKey={id}
             editorState={editorState}
             onChange={onChange}
             plugins={plugins}
@@ -64,7 +63,12 @@ const StyledInput = ({ defaultValue, type, wysiwyg, marginTop, id, index, dragga
             keyBindingFn={myKeyBindingFn}
         />
         {wysiwyg && <InlineToolbar />}
-    </div>;
+    </div>
+
+    const input = type ? <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+        {<FontAwesomeIcon className='icon' icon={type} style={{ marginRight: '10px' }} />}
+        {html}
+    </div> : html;
 
     return draggable ?
         <Draggable draggableId={id} index={index}>
