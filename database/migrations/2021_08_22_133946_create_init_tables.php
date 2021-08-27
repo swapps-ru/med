@@ -14,6 +14,68 @@ class CreateInitTables extends Migration
      */
     public function up()
     {
+        Schema::create('articles', function (Blueprint $table) {
+            $table->id();
+
+            $table->string('title')->nullable();
+
+            $table->text('desc_short')->nullable();
+
+            $table->text('block_ids')->nullable();
+
+            $table->string('disease_ids')->nullable();
+            $table->string('syndrome_ids')->nullable();
+            $table->string('symptom_ids')->nullable();
+            $table->string('aid_ids')->nullable();
+
+            $table->integer('views')->unsigned()->default(0);
+            $table->integer('views_recently')->unsigned()->default(0);
+
+            $table->bigInteger('user_id')->unsigned();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict');
+
+            $table->tinyInteger('is_published')->unsigned()->default(0);
+
+            $table->timestamps();
+        });
+
+        \App\Models\User::create([
+            'name' => 'admin',
+            'email' => 'test@mail.ru',
+            'password' => Hash::make('testpassword'),
+        ]);
+
+
+        DB::table('articles')->insert([
+            'title' => 'Рассеяный склероз - статья',
+            'desc_short' => 'Коротко',
+            'block_ids' => '_1__2_',
+            'disease_ids' => '_1_',
+            'syndrome_ids' => '_1_',
+            'symptom_ids' => '_1__2_',
+            'aid_ids' => '_1__2_',
+            'views' => 0,
+            'views_recently' => 0,
+            'user_id' => 1,
+            'is_published' => 1,
+            'created_at' => Carbon::now()
+        ]);
+
+
+        Schema::create('articles_history', function (Blueprint $table) {
+            $table->id();
+
+            $table->bigInteger('article_id')->unsigned();
+            $table->foreign('article_id')->references('id')->on('articles')->onDelete('restrict');
+
+            $table->bigInteger('user_id')->unsigned();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict');
+
+            $table->longtext('blocks_json')->nullable();
+
+            $table->timestamps();
+        });
+
         Schema::create('body_systems', function (Blueprint $table) {
             $table->id();
 
@@ -36,7 +98,7 @@ class CreateInitTables extends Migration
             ['names' => 'Система кровообращения', 'icon_class' => 'fa-'],
             ['names' => 'Лимфатическая система', 'icon_class' => 'fa-'],
             ['names' => 'Сердечно-сосудистая системы', 'icon_class' => 'fa-heartbeat'],
-            ['names' => 'Центральная нервная система', 'icon_class' => 'fa-brain'],
+            ['names' => 'Центральная нервная система;ЦНС', 'icon_class' => 'fa-brain'],
             ['names' => 'Периферическая нервная система', 'icon_class' => 'fa-brain'],
             ['names' => 'Органы чувств', 'icon_class' => 'fa-'],
             ['names' => 'Покровная система', 'icon_class' => 'fa-allergies'],
@@ -45,22 +107,29 @@ class CreateInitTables extends Migration
 
         Schema::create('disease_groups', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->nullable();
-            $table->string('name_scientific')->nullable();
+            $table->string('names')->nullable();
+            $table->string('names_scientific')->nullable();
 
-            $table->string('body_part_ids')->nullable();
+            $table->string('body_part_ids')->nullable(); //в следующей миграции переименуется в body_system_ids
 
-            $table->string('slug')->nullable()->index();
+            $table->string('slug')->nullable()->index(); //я вообще хз зачем добавил это поле, удалено в следующей миграции
 
             $table->timestamps();
         });
+
+        DB::table('disease_groups')->insert([
+            'names' => 'Нервные расстройства',
+            'names_scientific' => 'Неврологические заболевания',
+            'created_at' => Carbon::now(),
+            'body_part_ids' => '_11__12_'
+        ]);
 
         Schema::create('diseases', function (Blueprint $table) {
             $table->id();
             $table->string('names')->nullable();
             $table->string('names_scientific')->nullable();
 
-            $table->string('body_part_ids')->nullable();
+            $table->string('body_part_ids')->nullable(); //в следующей миграции переименуется в body_system_ids
 
             $table->string('disease_groups_ids')->nullable();
             $table->string('diseases_complication_ids')->nullable();
@@ -68,25 +137,37 @@ class CreateInitTables extends Migration
             $table->integer('wordstat_queries')->default(0)->unsigned();
             $table->text('wordstat_query_names')->nullable();
 
-            $table->tinyInteger('article_main_id')->default(0)->unsigned();
+            $table->bigInteger('article_main_id')->nullable()->unsigned();
+            $table->foreign('article_main_id')->references('id')->on('articles')->onDelete('restrict');
 
             $table->timestamps();
         });
+
+
+        DB::table('diseases')->insert([
+            'names' => 'Рассеяный склероз;обычное название',
+            'names_scientific' => 'Рассеяный склероз;научное название 2',
+            'body_part_ids' => '_11__12_',
+            'disease_groups_ids' => '_1_',
+            'article_main_id' => 1,
+            'wordstat_query_names' => 'рассеяный склероз',
+            'created_at' => Carbon::now()
+        ]);
+
 
         Schema::create('syndromes', function (Blueprint $table) {
             $table->id();
             $table->string('names')->nullable();
             $table->string('names_scientific')->nullable();
 
-            $table->string('symptom_include_ids')->nullable();
-
-            $table->string('diseases_add_ids')->nullable();
+            $table->string('symptom_include_ids')->nullable(); //какие сиптомы включает болезнь
 
             $table->integer('wordstat_queries')->default(0)->unsigned();
             $table->text('wordstat_query_names')->nullable();
 
             $table->timestamps();
         });
+
 
         Schema::create('symptoms', function (Blueprint $table) {
             $table->id();
@@ -95,7 +176,7 @@ class CreateInitTables extends Migration
 
             $table->string('icon_class')->nullable();
 
-            $table->string('body_part_ids')->nullable();
+            $table->string('body_part_ids')->nullable(); //в следующей миграции переименуется в body_system_ids
             $table->text('options_default_json')->nullable(); //какие "уточнения" симптома добавлять по-умолчанию в конструкторе
 
             $table->enum('type', ['pain', 'blood_test', 'measured', 'visual', 'other'])->default('other');
@@ -103,125 +184,11 @@ class CreateInitTables extends Migration
             $table->integer('wordstat_queries')->default(0)->unsigned();
             $table->text('wordstat_query_names')->nullable();
 
-            $table->tinyInteger('article_main_id')->default(0)->unsigned();
+            $table->bigInteger('article_main_id')->nullable()->unsigned();
+            $table->foreign('article_main_id')->references('id')->on('articles')->onDelete('restrict');
 
             $table->timestamps();
         });
-
-
-        Schema::create('aid_groups', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->nullable()->unique();
-
-            $table->text('desc_short')->nullable();
-            $table->text('desc_full')->nullable();
-
-            $table->timestamps();
-        });
-
-        Schema::create('aid_substances', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->nullable()->unique();
-
-            $table->text('desc_short')->nullable();
-            $table->text('desc_full')->nullable();
-
-            $table->bigInteger('aid_group_id')->unsigned();
-            $table->foreign('aid_group_id')->references('id')->on('aid_groups')->onDelete('restrict');
-
-            $table->string('restricted_aid_group_ids')->nullable();
-            $table->string('restricted_aid_ids')->nullable();
-
-            $table->string('careful_aid_groups_ids')->nullable();
-            $table->string('careful_aid_ids')->nullable();
-
-
-            $table->enum('allowed_pregnant', ['no', 'yes', 'careful', 'unknown'])->default('unknown')->index();
-            $table->enum('allowed_alco', ['no', 'yes', 'careful', 'unknown'])->default('unknown')->index();
-            $table->enum('allowed_driving', ['no', 'yes', 'careful', 'unknown'])->default('unknown')->index();
-
-            $table->tinyInteger('allowed_age_min')->unsigned()->default(18);
-
-
-            $table->timestamps();
-        });
-
-        Schema::create('aids', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->nullable()->unique();
-
-            $table->text('desc_short')->nullable();
-            $table->text('desc_full')->nullable();
-
-            $table->string('aid_substance_ids')->nullable();
-
-            $table->tinyInteger('popularity')->unsigned()->default(0);
-
-
-            $table->timestamps();
-        });
-
-        Schema::create('block_types', function (Blueprint $table) {
-            $table->id();
-
-            $table->string('description')->nullable();
-            $table->string('icon_class')->nullable();
-
-            $table->timestamps();
-        });
-
-        Schema::create('blocks', function (Blueprint $table) {
-            $table->id();
-
-            $table->bigInteger('type_id')->unsigned();
-            $table->foreign('type_id')->references('id')->on('block_types')->onDelete('restrict');
-
-            $table->text('data_json')->nullable();
-
-            $table->timestamps();
-        });
-
-
-        Schema::create('articles', function (Blueprint $table) {
-            $table->id();
-
-            $table->string('title')->nullable();
-
-            $table->text('desc_short')->nullable();
-
-            $table->text('block_ids')->nullable();
-
-            $table->string('disease_ids')->nullable();
-            $table->string('syndrome_ids')->nullable();
-            $table->string('symptom_ids')->nullable();
-            $table->string('aids_ids')->nullable();
-
-            $table->integer('views')->unsigned()->default(0);
-            $table->integer('views_recently')->unsigned()->default(0);
-
-            $table->bigInteger('user_id')->unsigned();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict');
-
-            $table->tinyInteger('is_published')->unsigned()->default(0);
-
-            $table->timestamps();
-        });
-
-
-        Schema::create('articles_history', function (Blueprint $table) {
-            $table->id();
-
-            $table->bigInteger('article_id')->unsigned();
-            $table->foreign('article_id')->references('id')->on('articles')->onDelete('restrict');
-
-            $table->bigInteger('user_id')->unsigned();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict');
-
-            $table->longtext('blocks_json')->nullable();
-
-            $table->timestamps();
-        });
-
 
         $symptoms = array_merge($this->getSymptomsParsed(), $this->getBloodTestsParsed());
         foreach ($symptoms as &$symptom) {
@@ -237,13 +204,21 @@ class CreateInitTables extends Migration
 
         DB::table('symptoms')->insert($symptoms);
 
+        DB::table('symptoms')->select('id')->where('id', 1)->update([
+            'article_main_id' => 1,
+            'options_default_json' => json_encode(['особенность 1', 'особенность 2'], JSON_UNESCAPED_UNICODE)
+        ]);
+
+        DB::table('symptoms')->select('id')->where('names', 'like', '%Онемение%')->update(['body_part_ids' => '_11__13__12_']);
+        DB::table('symptoms')->select('id')->where('names', 'like', '%Нарушение письма%')->update(['body_part_ids' => '_11__13__12_']);
+        DB::table('symptoms')->select('id')->where('names', 'like', '%Потеря памяти%')->update(['body_part_ids' => '_11__12_']);
 
         $symptomes_ids = [];
         $symptomes_ids[] = DB::table('symptoms')->select('id')->where('names', 'like', '%Боль в пояснице%')->first()->id;
         $symptomes_ids[] = DB::table('symptoms')->select('id')->where('names', 'like', '%Онемение%')->first()->id;
         $symptomes_ids[] = DB::table('symptoms')->select('id')->where('names', 'like', '%Мышечная слабость%')->first()->id;
 
-        DB::table('syndromes')->insert(['names' => 'Радикулярный синдром', 'created_at' => Carbon::now(), 'symptom_include_ids' => implode(',', $symptomes_ids)]);
+        DB::table('syndromes')->insert(['names' => 'Радикулярный синдром', 'created_at' => Carbon::now(), 'symptom_include_ids' => '_' . implode('__', $symptomes_ids) . '_']);
 
         $symptomes_ids = [];
         $symptomes_ids[] = DB::table('symptoms')->select('id')->where('names', 'like', '%Кровь в моче%')->first()->id;
@@ -252,7 +227,136 @@ class CreateInitTables extends Migration
         $symptomes_ids[] = DB::table('symptoms')->select('id')->where('names', 'like', '%Отеки лица%')->first()->id;
         $symptomes_ids[] = DB::table('symptoms')->select('id')->where('names_scientific', 'like', '%Анурия%')->first()->id;
 
-        DB::table('syndromes')->insert(['names' => 'Нефртический синдром', 'created_at' => Carbon::now(), 'symptom_include_ids' => implode(',', $symptomes_ids)]);
+        DB::table('syndromes')->insert(['names' => 'Нефртический синдром', 'created_at' => Carbon::now(), 'symptom_include_ids' => '_' . implode('__', $symptomes_ids) . '_']);
+
+
+        Schema::create('aid_groups', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->nullable()->unique();
+
+            $table->text('desc_short')->nullable();
+            $table->text('desc_full')->nullable();
+
+            $table->timestamps();
+        });
+
+        DB::table('aid_groups')->insert([
+            'name' => 'Группа лекарств',
+            'desc_short' => 'Коротко',
+            'desc_full' => 'Длинно',
+        ]);
+
+        DB::table('aid_groups')->insert([
+            'name' => 'Группа лекарств 2',
+            'desc_short' => 'Коротко 2',
+            'desc_full' => 'Длинно 2',
+        ]);
+
+        Schema::create('aid_substances', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->nullable()->unique();
+
+            $table->text('desc_short')->nullable();
+            $table->text('desc_full')->nullable();
+
+            $table->bigInteger('aid_group_id')->unsigned();
+            $table->foreign('aid_group_id')->references('id')->on('aid_groups')->onDelete('restrict');
+
+            $table->string('restricted_aid_group_ids')->nullable();
+            $table->string('restricted_aid_substance_ids')->nullable();
+
+            $table->string('careful_aid_groups_ids')->nullable();
+            $table->string('careful_aid_substance_ids')->nullable();
+
+
+            $table->enum('allowed_pregnant', ['no', 'yes', 'careful', 'unknown'])->default('unknown')->index();
+            $table->enum('allowed_alco', ['no', 'yes', 'careful', 'unknown'])->default('unknown')->index();
+            $table->enum('allowed_driving', ['no', 'yes', 'careful', 'unknown'])->default('unknown')->index();
+
+            $table->tinyInteger('allowed_age_min')->unsigned()->default(18);
+
+
+            $table->timestamps();
+        });
+
+        DB::table('aid_substances')->insert([
+            'name' => 'Действ. вещество',
+            'desc_short' => 'Коротко',
+            'desc_full' => 'Длинно',
+            'aid_group_id' => 1,
+            'restricted_aid_group_ids' => '_1_',
+            'restricted_aid_substance_ids' => '_1_',
+            'careful_aid_groups_ids' => '_2_',
+            'careful_aid_substance_ids' => '_1_',
+        ]);
+
+        Schema::create('aids', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->nullable()->unique();
+
+            $table->bigInteger('aid_group_id')->unsigned();
+            $table->foreign('aid_group_id')->references('id')->on('aid_groups')->onDelete('restrict');
+
+            $table->string('aid_substance_ids')->nullable();
+
+            $table->text('desc_short')->nullable();
+            $table->text('desc_full')->nullable();
+
+            $table->tinyInteger('popularity')->unsigned()->default(0);
+
+            $table->timestamps();
+        });
+
+        DB::table('aids')->insert([
+            'name' => 'Лекарство',
+            'desc_short' => 'Коротко',
+            'desc_full' => 'Длинно',
+            'aid_group_id' => 1,
+            'aid_substance_ids' => '_1_',
+        ]);
+
+        Schema::create('block_types', function (Blueprint $table) {
+            $table->id();
+
+            $table->string('title')->nullable();
+
+            $table->string('react_module')->nullable();
+
+            $table->string('icon_class')->nullable();
+        });
+
+        DB::table('block_types')->insert([
+            'title' => 'Заголовок',
+            'react_module' => 'Input',
+            'icon_class' => 'fa fa-heading',
+        ]);
+
+        DB::table('block_types')->insert([
+            'title' => 'Абзац',
+            'react_module' => 'TextArea',
+            'icon_class' => 'fa fa-align-right',
+        ]);
+
+        Schema::create('blocks', function (Blueprint $table) {
+            $table->id();
+
+            $table->bigInteger('type_id')->unsigned();
+            $table->foreign('type_id')->references('id')->on('block_types')->onDelete('restrict');
+
+            $table->text('data_json')->nullable();
+
+            $table->timestamps();
+        });
+
+        DB::table('blocks')->insert([
+            'type_id' => 1,
+            'data_json' => '{"html": "Рассеяный склероз"}'
+        ]);
+
+        DB::table('blocks')->insert([
+            'type_id' => 2,
+            'data_json' => '{"html": "Про рассеяный склероз"}',
+        ]);
     }
 
     /**
@@ -348,7 +452,7 @@ class CreateInitTables extends Migration
             $variants_scientific = [];
 
             $type = 'other';
-            $string_imploded = implode(', ', array_merge($name_bases, $name_scientific_bases));
+            $string_imploded = implode(';', array_merge($name_bases, $name_scientific_bases));
             if (mb_stripos($string_imploded, 'боль') !== false || mb_stripos($string_imploded, 'боли') !== false) {
                 $type = 'pain';
             } else if (mb_stripos($string_imploded, 'покрасн') !== false || mb_stripos($string_imploded, 'кожи') !== false || mb_stripos($string_imploded, 'сыпь') !== false) {
@@ -364,8 +468,8 @@ class CreateInitTables extends Migration
             }
 
             $list_symptoms[] = [
-                'names' => implode(', ', $variants),
-                'names_scientific' => implode(', ', $variants_scientific),
+                'names' => implode(';', $variants),
+                'names_scientific' => implode(';', $variants_scientific),
                 'type' => $type
             ];
 
@@ -410,8 +514,8 @@ class CreateInitTables extends Migration
                             }
 
                             $list_symptoms[] = [
-                                'names' => implode(', ', $variants),
-                                'names_scientific' => implode(', ', $variants_scientific),
+                                'names' => implode(';', $variants),
+                                'names_scientific' => implode(';', $variants_scientific),
                                 'type' => $type
                             ];
                         }
@@ -439,8 +543,8 @@ class CreateInitTables extends Migration
                         }
 
                         $list_symptoms[] = [
-                            'names' => implode(', ', $variants),
-                            'names_scientific' => implode(', ', $variants_scientific),
+                            'names' => implode(';', $variants),
+                            'names_scientific' => implode(';', $variants_scientific),
                             'type' => $type
                         ];
                     }
@@ -474,8 +578,8 @@ class CreateInitTables extends Migration
                     }
 
                     $list_symptoms[] = [
-                        'names' => implode(', ', $variants),
-                        'names_scientific' => implode(', ', $variants_scientific),
+                        'names' => implode(';', $variants),
+                        'names_scientific' => implode(';', $variants_scientific),
                         'type' => $type
                     ];
                 }
@@ -565,8 +669,8 @@ class CreateInitTables extends Migration
 
 
                     $list_symptoms[] = [
-                        'names' => implode(', ', $variants),
-                        'names_scientific' => implode(', ', $variants_scientific),
+                        'names' => implode(';', $variants),
+                        'names_scientific' => implode(';', $variants_scientific),
                         'type' => 'blood_test'
                     ];
                 }

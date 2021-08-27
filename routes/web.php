@@ -4,7 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\GitController;
-use morphos\Russian\NounDeclension;
+use App\Http\Controllers\ArticlesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,7 +16,6 @@ use morphos\Russian\NounDeclension;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -33,6 +32,8 @@ Route::get('/dashboard', function () {
 Route::get('/article-constructor', function () {
     return Inertia::render('ArticleConstructor');
 });
+
+Route::get('/test-models', [ArticlesController::class, 'testModels']);
 
 Route::any(env('PATH_ADMIN_NAME') . '/git-auto', [GitController::class, 'gitPull'])->name('admin.git-pull');
 
