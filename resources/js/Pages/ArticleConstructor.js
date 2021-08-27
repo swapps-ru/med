@@ -9,7 +9,6 @@ export default function ArticleConstructor(props) {
         <Authenticated
             auth={{ user: { name: 'Nick', email: 'n1ckjansens@yandex.ru' } }}
             errors={props.errors}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Конструктор статей</h2>}
         >
             <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex sm:flex-col lg:flex-row article-constructor">
                 {/* Основная форма */}

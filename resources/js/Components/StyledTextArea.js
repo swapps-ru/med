@@ -62,6 +62,7 @@ const StyledTextArea = ({ defaultValue, type, marginTop, wysiwyg, id, index, dra
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
+                    style={provided.draggableProps.style}
                 >
                     {textarea}
                 </div>

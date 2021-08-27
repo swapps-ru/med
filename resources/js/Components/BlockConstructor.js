@@ -37,24 +37,24 @@ export default function BlockConstructor({ type, defaultValue, draggable, wysiwy
                                         key={`item-${index + 2}`}
                                         draggable={false}
                                     />
-                                    <BlockConstructor
+                                    {items[1] && <BlockConstructor
                                         {...items[1]}
                                         index={index + 3}
                                         id={`item-${index + 3}`}
                                         key={`item-${index + 3}`}
-                                    />
-                                    <BlockConstructor
+                                    />}
+                                    {items[2] && <BlockConstructor
                                         {...items[2]}
                                         index={index + 4}
                                         id={`item-${index + 4}`}
                                         key={`item-${index + 4}`}
-                                    />
-                                    <BlockConstructor
+                                    />}
+                                    {items[3] && <BlockConstructor
                                         {...items[3]}
                                         index={index + 5}
                                         id={`item-${index + 5}`}
                                         key={`item-${index + 5}`}
-                                    />
+                                    />}
                                     {/* ))} */}
                                     {provided.placeholder}
                                 </div >

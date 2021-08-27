@@ -25,6 +25,8 @@ const reorder = (list, startIndex, endIndex) => {
 };
 
 export default class ConstructorForm extends Component {
+    currentIndex = 0;
+
     constructor(props) {
         super(props);
         this.state = {
@@ -42,11 +44,24 @@ export default class ConstructorForm extends Component {
 
         if (Number(data.destination.droppableId) && data.type === 'GROUP') {
             items = Array.from(this.state.items);
-            items[Number(data.destination.droppableId - 1)] = reorder(
-                this.state.items[Number(data.destination.droppableId - 1)],
-                data.source.index - Number(data.destination.droppableId) - 1,
-                data.destination.index - Number(data.destination.droppableId) - 1
-            );
+
+            if (data.destination.droppableId === data.source.droppableId) {
+                items[Number(data.destination.droppableId - 1)] = reorder(
+                    this.state.items[Number(data.destination.droppableId - 1)],
+                    data.source.index - Number(data.destination.droppableId) - 1,
+                    data.destination.index - Number(data.destination.droppableId) - 1
+                );
+            } else {
+                const item = items[Number(data.source.droppableId - 1)][data.source.index - Number(data.source.droppableId) - 1];
+                console.log(item);
+                items[Number(data.destination.droppableId - 1)].push(item);
+                delete items[Number(data.source.droppableId - 1)][data.source.index - Number(data.source.droppableId) - 1];
+                items[Number(data.destination.droppableId - 1)] = reorder(
+                    items[Number(data.destination.droppableId - 1)],
+                    items[Number(data.destination.droppableId - 1)].length - 1,
+                    data.destination.index - Number(data.destination.droppableId) - 1
+                );
+            }
         } else {
             items = reorder(
                 this.state.items,
@@ -59,6 +74,11 @@ export default class ConstructorForm extends Component {
             items
         });
     };
+
+    getIndex() {
+        this.currentIndex++;
+        return this.currentIndex;
+    }
 
     render() {
         return (

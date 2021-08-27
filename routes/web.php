@@ -31,7 +31,7 @@ Route::get('/dashboard', function () {
 
 Route::get('/article-constructor', function () {
     return Inertia::render('ArticleConstructor');
-});
+})->name('article-constructor');
 
 Route::get('/test-models', [ArticlesController::class, 'testModels']);
 
