@@ -65,7 +65,7 @@ const StyledInput = ({ defaultValue, type, wysiwyg, marginTop, id, index, dragga
         {wysiwyg && <InlineToolbar />}
     </div>
 
-    const input = type ? <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+    const input = type ? <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
         {<FontAwesomeIcon className='icon' icon={type} style={{ marginRight: '10px' }} />}
         {html}
     </div> : html;
@@ -77,7 +77,7 @@ const StyledInput = ({ defaultValue, type, wysiwyg, marginTop, id, index, dragga
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    style={provided.draggableProps.style}
+                    style={{ ...provided.draggableProps.style, width: '700px', display: 'flex', justifyContent: 'center' }}
                 >
                     {input}
                 </div>

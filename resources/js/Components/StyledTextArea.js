@@ -37,12 +37,11 @@ const StyledTextArea = ({ defaultValue, type, marginTop, wysiwyg, id, index, dra
         editor.current && editor.current.focus();
     };
 
-    const textarea = <div
+    const html = <div
         className='editor'
         onClick={focus}
         style={{ marginTop }}
     >
-        {type && <FontAwesomeIcon className='icon' icon={type} />}
         <Editor
             editorKey="StyledTextArea"
             editorState={editorState}
@@ -55,6 +54,11 @@ const StyledTextArea = ({ defaultValue, type, marginTop, wysiwyg, id, index, dra
         {wysiwyg && <InlineToolbar />}
     </div>;
 
+    const textarea = type ? <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+        {<FontAwesomeIcon className='icon' icon={type} style={{ marginRight: '10px' }} />}
+        {html}
+    </div> : html;
+
     return draggable ?
         <Draggable draggableId={id} index={index}>
             {(provided, snapshot) => (
@@ -62,7 +66,7 @@ const StyledTextArea = ({ defaultValue, type, marginTop, wysiwyg, id, index, dra
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    style={provided.draggableProps.style}
+                    style={{ ...provided.draggableProps.style, width: '700px', display: 'flex', justifyContent: 'center' }}
                 >
                     {textarea}
                 </div>

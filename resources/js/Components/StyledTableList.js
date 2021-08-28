@@ -8,7 +8,7 @@ import { Draggable } from 'react-beautiful-dnd';
 const StyledTableList = ({ defaultValue, type, marginTop, draggable, id, index }) => {
     const tableList = <div
         className='table-list'
-        style={{ marginTop, display: 'flex', flexDirection: 'row', maxWidth: '100%' }}
+        style={{ marginTop, display: 'flex', flexDirection: 'row' }}
     >
         <FontAwesomeIcon className='icon' icon={type} style={{ marginRight: '10px' }} />
         <div style={{ minWidth: '400px' }}>
@@ -24,6 +24,7 @@ const StyledTableList = ({ defaultValue, type, marginTop, draggable, id, index }
                 ref={provided.innerRef}
                 {...provided.draggableProps}
                 {...provided.dragHandleProps}
+                style={{ ...provided.draggableProps.style, width: '700px', display: 'flex', justifyContent: 'center' }}
             >
                 {tableList}
             </div>

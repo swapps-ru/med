@@ -46,20 +46,19 @@ export default class ConstructorForm extends Component {
             items = Array.from(this.state.items);
 
             if (data.destination.droppableId === data.source.droppableId) {
-                items[Number(data.destination.droppableId - 1)] = reorder(
-                    this.state.items[Number(data.destination.droppableId - 1)],
-                    data.source.index - Number(data.destination.droppableId) - 1,
-                    data.destination.index - Number(data.destination.droppableId) - 1
+                items[data.destination.droppableId - 1] = reorder(
+                    this.state.items[data.destination.droppableId - 1],
+                    data.source.index - data.destination.droppableId - 1,
+                    data.destination.index - data.destination.droppableId - 1
                 );
             } else {
-                const item = items[Number(data.source.droppableId - 1)][data.source.index - Number(data.source.droppableId) - 1];
-                console.log(item);
-                items[Number(data.destination.droppableId - 1)].push(item);
-                delete items[Number(data.source.droppableId - 1)][data.source.index - Number(data.source.droppableId) - 1];
-                items[Number(data.destination.droppableId - 1)] = reorder(
-                    items[Number(data.destination.droppableId - 1)],
-                    items[Number(data.destination.droppableId - 1)].length - 1,
-                    data.destination.index - Number(data.destination.droppableId) - 1
+                const item = items[data.source.droppableId - 1][data.source.index - data.source.droppableId - 1];
+                items[data.destination.droppableId - 1].push(item);
+                delete items[data.source.droppableId - 1][data.source.index - data.source.droppableId - 1];
+                items[data.destination.droppableId - 1] = reorder(
+                    items[data.destination.droppableId - 1],
+                    items[data.destination.droppableId - 1].length - 1,
+                    data.destination.index - data.destination.droppableId - 1
                 );
             }
         } else {

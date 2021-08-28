@@ -16,7 +16,7 @@ export default function BlockConstructor({ type, defaultValue, draggable, wysiwy
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
-                        style={provided.draggableProps.style}
+                        style={{ ...provided.draggableProps.style }}
                     >
                         <Droppable droppableId={`${index + 1}`} type={`GROUP`}>
                             {(provided, snapshot) => (

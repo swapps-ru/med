@@ -21,6 +21,7 @@ const StyledSpoiler = ({ defaultValue, type, marginTop, draggable, id, index }) 
                 ref={provided.innerRef}
                 {...provided.draggableProps}
                 {...provided.dragHandleProps}
+                style={{ ...provided.draggableProps.style, width: '700px', display: 'flex', justifyContent: 'center' }}
             >
                 {spoiler}
             </div>
