@@ -48,20 +48,29 @@ export default class ConstructorForm extends Component {
         if (Number(data.destination.droppableId) && data.type === 'GROUP') {
             items = Array.from(this.state.items);
 
+            let min = 0;
+            let man = 0;
+            if (Array.isArray(items[data.source.droppableId - 2])) {
+                min = items[data.source.droppableId - 2].length - 1;
+            }
+            if (Array.isArray(items[data.destination.droppableId - 2])) {
+                man = items[data.destination.droppableId - 2].length - 1;
+            }
+
             if (data.destination.droppableId === data.source.droppableId) {
                 items[data.destination.droppableId - 1] = reorder(
                     this.state.items[data.destination.droppableId - 1],
-                    data.source.index - data.destination.droppableId - 1,
-                    data.destination.index - data.destination.droppableId - 1
+                    data.source.index - data.destination.droppableId - 1 - min,
+                    data.destination.index - data.destination.droppableId - 1 - min,
                 );
             } else {
-                const item = items[data.source.droppableId - 1][data.source.index - data.source.droppableId - 1];
+                const item = items[data.source.droppableId - 1][data.source.index - min - data.source.droppableId - 1];
                 items[data.destination.droppableId - 1].push(item);
-                delete items[data.source.droppableId - 1][data.source.index - data.source.droppableId - 1];
+                items[data.source.droppableId - 1].splice(data.source.index - min - data.source.droppableId - 1, 1);
                 items[data.destination.droppableId - 1] = reorder(
                     items[data.destination.droppableId - 1],
                     items[data.destination.droppableId - 1].length - 1,
-                    data.destination.index === 0 ? data.destination.index + 1 : data.destination.index - data.destination.droppableId - 1
+                    data.destination.index === 0 ? data.destination.index + 1 : data.destination.index - data.destination.droppableId - 1 - man
                 );
             }
         } else {
@@ -125,12 +134,17 @@ export default class ConstructorForm extends Component {
                                                                     }}
                                                                 >
                                                                     {item.map((block, index) => {
+                                                                        let j = index;
+                                                                        if (Array.isArray(this.state.items[i - 1])) {
+                                                                            j += this.state.items[i - 1].length
+                                                                        };
+
                                                                         return <BlockConstructor
                                                                             {...block}
-                                                                            index={index + 2 + i}
-                                                                            id={`item-${index + 2}`}
-                                                                            key={`item-${index + 2}`}
-                                                                            draggable={block.type !== 'heading' && index !== 0}
+                                                                            index={j + 2}
+                                                                            id={`item-${j + 2}`}
+                                                                            key={`item-${j + 2}`}
+                                                                            draggable={block && block.type !== 'heading' && index !== 0}
                                                                         />
                                                                     })}
                                                                     {provided.placeholder}
@@ -145,9 +159,9 @@ export default class ConstructorForm extends Component {
 
                                     return <BlockConstructor
                                         {...item}
-                                        index={index}
-                                        id={`item-${index}`}
-                                        key={`item-${index}`}
+                                        index={i}
+                                        id={`item-${i}`}
+                                        key={`item-${i}`}
                                     />
                                 })}
                             </div>
