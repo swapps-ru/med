@@ -65,7 +65,7 @@ const StyledInput = ({ defaultValue, type, wysiwyg, marginTop, id, index, dragga
         {wysiwyg && <InlineToolbar />}
     </div>
 
-    const input = type ? <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+    const input = type ? <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '700px', justifyContent: 'center' }}>
         {<FontAwesomeIcon className='icon' icon={type} style={{ marginRight: '10px' }} />}
         {html}
     </div> : html;

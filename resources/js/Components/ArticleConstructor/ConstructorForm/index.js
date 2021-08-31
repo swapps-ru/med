@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Droppable } from 'react-beautiful-dnd';
+import { Draggable, Droppable } from 'react-beautiful-dnd'
 import ControlMenu from './Components/ControlMenu'
 import { DragDropContext } from 'react-beautiful-dnd';
 import BlockConstructor from '@/Components/BlockConstructor'
@@ -13,7 +13,9 @@ const defaultItems = [
         { type: 'list', defaultValue: ['Диабет 1ого типа', 'Диабет 2ого типа', 'Некоторые редкие типы'], draggable: true, wysiwyg: true, marginTop: 10 },
         { type: 'spoiler', defaultValue: ['Диабет 1ого типа', 'Nostrud dolore eiusmod dolore ea incididunt. In Lorem fugiat mollit pariatur ipsum occaecat cupidatat. Et sint aliquip occaecat ad anim ipsum exercitation in tempor mollit ipsum.'], draggable: true, wysiwyg: true, marginTop: 10 },
     ],
-    { type: 'heading', defaultValue: "Какими лекарствами лечат сахарный диабет", draggable: true, marginTop: 10 },
+    [
+        { type: 'heading', defaultValue: "Какими лекарствами лечат сахарный диабет", draggable: true, marginTop: 10 },
+    ]
 ];
 
 const reorder = (list, startIndex, endIndex) => {
@@ -25,6 +27,7 @@ const reorder = (list, startIndex, endIndex) => {
 };
 
 export default class ConstructorForm extends Component {
+    indexes = {}
     currentIndex = 0;
 
     constructor(props) {
@@ -58,7 +61,7 @@ export default class ConstructorForm extends Component {
                 items[data.destination.droppableId - 1] = reorder(
                     items[data.destination.droppableId - 1],
                     items[data.destination.droppableId - 1].length - 1,
-                    data.destination.index - data.destination.droppableId - 1
+                    data.destination.index === 0 ? data.destination.index + 1 : data.destination.index - data.destination.droppableId - 1
                 );
             }
         } else {
@@ -76,7 +79,6 @@ export default class ConstructorForm extends Component {
 
     getIndex() {
         this.currentIndex++;
-        return this.currentIndex;
     }
 
     render() {
@@ -100,15 +102,54 @@ export default class ConstructorForm extends Component {
                                 alignItems: 'center',
                                 maxWidth: '80%'
                             }}>
-                                {this.state.items.map((item, i) => (
-                                    <BlockConstructor
+                                {this.state.items.map((item, i) => {
+                                    if (Array.isArray(item)) {
+                                        return (
+                                            <Draggable draggableId={`item-${i}`} index={i} key={`item-${i}`}>
+                                                {(provided, snapshot) => (
+                                                    <div
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        {...provided.dragHandleProps}
+                                                        style={{ ...provided.draggableProps.style }}
+                                                    >
+                                                        <Droppable droppableId={`${i + 1}`} type={`GROUP`} key={`item-${i + 1}`}>
+                                                            {(provided, snapshot) => (
+                                                                <div
+                                                                    ref={provided.innerRef}
+                                                                    {...provided.droppableProps}
+                                                                    style={{
+                                                                        display: 'flex',
+                                                                        flexDirection: 'column',
+                                                                        alignItems: 'center'
+                                                                    }}
+                                                                >
+                                                                    {item.map((block, index) => {
+                                                                        return <BlockConstructor
+                                                                            {...block}
+                                                                            index={index + 2 + i}
+                                                                            id={`item-${index + 2}`}
+                                                                            key={`item-${index + 2}`}
+                                                                            draggable={block.type !== 'heading' && index !== 0}
+                                                                        />
+                                                                    })}
+                                                                    {provided.placeholder}
+                                                                </div >
+                                                            )}
+                                                        </Droppable>
+                                                    </div>
+                                                )}
+                                            </Draggable>
+                                        );
+                                    }
+
+                                    return <BlockConstructor
                                         {...item}
-                                        index={i}
-                                        id={`item-${i}`}
-                                        key={`item-${i}`}
-                                        isGroup={Array.isArray(item)}
+                                        index={index}
+                                        id={`item-${index}`}
+                                        key={`item-${index}`}
                                     />
-                                ))}
+                                })}
                             </div>
                             {provided.placeholder}
                         </div >
