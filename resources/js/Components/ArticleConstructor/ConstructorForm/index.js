@@ -33,9 +33,37 @@ export default class ConstructorForm extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            items: defaultItems
+            items: defaultItems,
+            ctrlKeyPressed: false
         };
         this.onDragEnd = this.onDragEnd.bind(this);
+    }
+
+    onKeydown(e) {
+        if (e.key === 'c') {
+            e.preventDefault()
+            this.setState({ ...this.state, ctrlKeyPressed: true })
+        }
+    }
+
+    onKeyup(e) {
+        if (e.key === 'c') {
+            e.preventDefault()
+            this.setState({ ...this.state, ctrlKeyPressed: false })
+        }
+    }
+
+    componentDidMount() {
+        document.addEventListener('keydown', this.onKeydown.bind(this));
+        document.addEventListener('keyup', this.onKeyup.bind(this));
+        window.addEventListener('contextmenu', function (e) { // Не совместимо с IE младше 9 версии
+            e.preventDefault();
+        }, false);
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('keydown', this.onKeydown);
+        document.removeEventListener('keyup', this.onKeyup);
     }
 
     onDragEnd(data) {
@@ -82,6 +110,7 @@ export default class ConstructorForm extends Component {
         }
 
         this.setState({
+            ...this.state,
             items
         });
     };
@@ -144,7 +173,7 @@ export default class ConstructorForm extends Component {
                                                                             index={j + 2}
                                                                             id={`item-${j + 2}`}
                                                                             key={`item-${j + 2}`}
-                                                                            draggable={block && block.type !== 'heading' && index !== 0}
+                                                                            draggable={(block && block.type !== 'heading' && index !== 0) || this.state.ctrlKeyPressed}
                                                                         />
                                                                     })}
                                                                     {provided.placeholder}
