@@ -85,14 +85,29 @@ export default class ConstructorForm extends Component {
                 man = items[data.destination.droppableId - 2].length - 1;
             }
 
-            if (data.destination.droppableId === data.source.droppableId) {
+            const item = items[data.source.droppableId - 1][data.source.index - min - data.source.droppableId - 1];
+
+            if (item.type === 'heading' && data.source.index - min - data.source.droppableId - 1 === 0) {
+                if (data.source.index - min - data.source.droppableId - 1 < data.destination.index - data.destination.droppableId - 1 - man) {
+                    const deleted = items[data.source.droppableId - 1].splice(1, data.destination.index - data.destination.droppableId - 1 - man)
+                    if (items[data.source.droppableId - 2]) {
+                        items[data.source.droppableId - 2].push(...deleted)
+                    } else {
+                        items.push(deleted);
+                        items = reorder(
+                            items,
+                            items.length - 1,
+                            data.source.droppableId - 1
+                        )
+                    }
+                }
+            } else if (data.destination.droppableId === data.source.droppableId) {
                 items[data.destination.droppableId - 1] = reorder(
                     this.state.items[data.destination.droppableId - 1],
                     data.source.index - data.destination.droppableId - 1 - min,
                     data.destination.index - data.destination.droppableId - 1 - min,
                 );
             } else {
-                const item = items[data.source.droppableId - 1][data.source.index - min - data.source.droppableId - 1];
                 items[data.destination.droppableId - 1].push(item);
                 items[data.source.droppableId - 1].splice(data.source.index - min - data.source.droppableId - 1, 1);
                 items[data.destination.droppableId - 1] = reorder(
