@@ -42,7 +42,7 @@ export default class ConstructorForm extends Component {
     onKeydown(e) {
         if (e.key === 'c') {
             e.preventDefault()
-            this.setState({ ...this.state, ctrlKeyPressed: true })
+            !this.state.ctrlKeyPressed && this.setState({ ...this.state, ctrlKeyPressed: true })
         }
     }
 
@@ -168,12 +168,14 @@ export default class ConstructorForm extends Component {
                                                                             j += this.state.items[i - 1].length
                                                                         };
 
+                                                                        const draggable = snapshot.isDraggingOver || !(block && block.type === 'heading' && index === 0) || this.state.ctrlKeyPressed || (block && block.type !== 'heading' && index === 0);
+
                                                                         return <BlockConstructor
                                                                             {...block}
                                                                             index={j + 2}
                                                                             id={`item-${j + 2}`}
                                                                             key={`item-${j + 2}`}
-                                                                            draggable={(block && block.type !== 'heading' && index !== 0) || this.state.ctrlKeyPressed}
+                                                                            draggable={draggable}
                                                                         />
                                                                     })}
                                                                     {provided.placeholder}
