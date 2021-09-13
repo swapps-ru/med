@@ -15,7 +15,13 @@ const defaultItems = [
     ],
     [
         { type: 'heading', defaultValue: "Какими лекарствами лечат сахарный диабет", draggable: true, marginTop: 10 },
-    ]
+    ],
+    // [
+    //     { type: 'heading', defaultValue: 'Общие сведения', draggable: true, marginTop: 10 },
+    //     { type: 'text-area', defaultValue: 'Nostrud dolore eiusmod dolore ea incididunt. In Lorem fugiat mollit pariatur ipsum occaecat cupidatat. Et sint aliquip occaecat ad anim ipsum exercitation in tempor mollit ipsum.', draggable: true, wysiwyg: true, marginTop: 10 },
+    //     { type: 'list', defaultValue: ['Диабет 1ого типа', 'Диабет 2ого типа', 'Некоторые редкие типы'], draggable: true, wysiwyg: true, marginTop: 10 },
+    //     { type: 'spoiler', defaultValue: ['Диабет 1ого типа', 'Nostrud dolore eiusmod dolore ea incididunt. In Lorem fugiat mollit pariatur ipsum occaecat cupidatat. Et sint aliquip occaecat ad anim ipsum exercitation in tempor mollit ipsum.'], draggable: true, wysiwyg: true, marginTop: 10 },
+    // ],
 ];
 
 const reorder = (list, startIndex, endIndex) => {
@@ -27,9 +33,6 @@ const reorder = (list, startIndex, endIndex) => {
 };
 
 export default class ConstructorForm extends Component {
-    indexes = {}
-    currentIndex = 0;
-
     constructor(props) {
         super(props);
         this.state = {
@@ -73,54 +76,71 @@ export default class ConstructorForm extends Component {
             return;
         }
 
-        if (Number(data.destination.droppableId) && data.type === 'GROUP') {
-            items = Array.from(this.state.items);
+        items = Array.from(this.state.items);
 
-            let min = 0;
-            let man = 0;
-            if (Array.isArray(items[data.source.droppableId - 2])) {
-                min = items[data.source.droppableId - 2].length - 1;
-            }
-            if (Array.isArray(items[data.destination.droppableId - 2])) {
-                man = items[data.destination.droppableId - 2].length - 1;
-            }
+        const groupMin = data.source.droppableId === 'ConstructorForm' ? data.draggableId[data.draggableId.length - 1] : data.source.droppableId;
+        const groupMan = data.destination.droppableId === 'ConstructorForm' ? data.draggableId[data.draggableId.length - 1] : data.destination.droppableId;
 
-            const item = items[data.source.droppableId - 1][data.source.index - min - data.source.droppableId - 1];
+        let min = 0;
+        let man = 0;
+        let myn = 0;
 
-            if (item.type === 'heading' && data.source.index - min - data.source.droppableId - 1 === 0) {
-                if (data.source.index - min - data.source.droppableId - 1 < data.destination.index - data.destination.droppableId - 1 - man) {
-                    const deleted = items[data.source.droppableId - 1].splice(1, data.destination.index - data.destination.droppableId - 1 - man)
-                    if (items[data.source.droppableId - 2]) {
-                        items[data.source.droppableId - 2].push(...deleted)
+        for (let i = 0; i < groupMin; i++) {
+            if (Array.isArray(this.state.items[i])) {
+                min += this.state.items[i].length
+            };
+        }
+        for (let i = 0; i < groupMan; i++) {
+            if (Array.isArray(this.state.items[i])) {
+                man += this.state.items[i].length
+            };
+        }
+        for (let i = 0; i <= groupMin; i++) {
+            if (Array.isArray(this.state.items[i])) {
+                myn += this.state.items[i].length
+            };
+        }
+
+        if ((Number(data.destination.droppableId) || data.destination.droppableId === '0') && data.type === 'GROUP') {
+            min = min === 0 ? 0 : min + 1;
+            man = man === 0 ? 0 : man + 1;
+
+            const item = items[data.source.droppableId][data.source.index - 1 - min];
+
+            if (item.type === 'heading' && data.source.index - 1 - min === 0) {
+                if (data.source.index - 1 - min < data.destination.index - 1 - man) {
+                    const deleted = items[data.source.droppableId].splice(1, data.destination.index - 1 - man)
+                    if (items[data.source.droppableId - 1]) {
+                        items[data.source.droppableId - 1].push(...deleted)
                     } else {
                         items.push(deleted);
                         items = reorder(
                             items,
                             items.length - 1,
-                            data.source.droppableId - 1
+                            data.source.droppableId
                         )
                     }
                 }
             } else if (data.destination.droppableId === data.source.droppableId) {
-                items[data.destination.droppableId - 1] = reorder(
-                    this.state.items[data.destination.droppableId - 1],
-                    data.source.index - data.destination.droppableId - 1 - min,
-                    data.destination.index - data.destination.droppableId - 1 - min,
+                items[data.destination.droppableId] = reorder(
+                    this.state.items[data.destination.droppableId],
+                    data.source.index - 1 - min,
+                    data.destination.index - 1 - min,
                 );
             } else {
-                items[data.destination.droppableId - 1].push(item);
-                items[data.source.droppableId - 1].splice(data.source.index - min - data.source.droppableId - 1, 1);
-                items[data.destination.droppableId - 1] = reorder(
-                    items[data.destination.droppableId - 1],
-                    items[data.destination.droppableId - 1].length - 1,
-                    data.destination.index === 0 ? data.destination.index + 1 : data.destination.index - data.destination.droppableId - 1 - man
+                items[data.destination.droppableId].push(item);
+                items[data.source.droppableId].splice(data.source.index - 1 - min, 1);
+                items[data.destination.droppableId] = reorder(
+                    items[data.destination.droppableId],
+                    items[data.destination.droppableId].length - 1,
+                    data.destination.index === 0 ? data.destination.index + 1 : data.destination.index - 1 - man
                 );
             }
         } else {
             items = reorder(
                 this.state.items,
-                data.source.index,
-                data.destination.index
+                data.source.index - min,
+                data.destination.index - myn
             );
         }
 
@@ -129,10 +149,6 @@ export default class ConstructorForm extends Component {
             items
         });
     };
-
-    getIndex() {
-        this.currentIndex++;
-    }
 
     render() {
         return (
@@ -157,8 +173,14 @@ export default class ConstructorForm extends Component {
                             }}>
                                 {this.state.items.map((item, i) => {
                                     if (Array.isArray(item)) {
+                                        let draggableIndex = i;
+
+                                        for (let n = 0; n < i; n++) {
+                                            draggableIndex += this.state.items[n].length;
+                                        }
+
                                         return (
-                                            <Draggable draggableId={`item-${i}`} index={i} key={`item-${i}`}>
+                                            <Draggable draggableId={`item-${draggableIndex}-${i}`} index={draggableIndex} key={`item-${draggableIndex}`}>
                                                 {(provided, snapshot) => (
                                                     <div
                                                         ref={provided.innerRef}
@@ -166,7 +188,7 @@ export default class ConstructorForm extends Component {
                                                         {...provided.dragHandleProps}
                                                         style={{ ...provided.draggableProps.style }}
                                                     >
-                                                        <Droppable droppableId={`${i + 1}`} type={`GROUP`} key={`item-${i + 1}`}>
+                                                        <Droppable droppableId={`${i}`} type={`GROUP`} key={`item-${i}`}>
                                                             {(provided, snapshot) => (
                                                                 <div
                                                                     ref={provided.innerRef}
@@ -179,20 +201,22 @@ export default class ConstructorForm extends Component {
                                                                 >
                                                                     {item.map((block, index) => {
                                                                         let j = index;
-                                                                        if (Array.isArray(this.state.items[i - 1])) {
-                                                                            j += this.state.items[i - 1].length
-                                                                        };
+
+                                                                        for (let n = 0; n < i; n++) {
+                                                                            j += this.state.items[n].length + 1;
+                                                                        }
 
                                                                         const draggable = snapshot.isDraggingOver || !(block && block.type === 'heading' && index === 0) || this.state.ctrlKeyPressed || (block && block.type !== 'heading' && index === 0);
 
                                                                         return <BlockConstructor
                                                                             {...block}
-                                                                            index={j + 2}
-                                                                            id={`item-${j + 2}`}
-                                                                            key={`item-${j + 2}`}
+                                                                            index={j + 1}
+                                                                            id={`item-${j + 1}`}
+                                                                            key={`item-${j + 1}`}
                                                                             draggable={draggable}
                                                                         />
-                                                                    })}
+                                                                    })
+                                                                    }
                                                                     {provided.placeholder}
                                                                 </div >
                                                             )}
