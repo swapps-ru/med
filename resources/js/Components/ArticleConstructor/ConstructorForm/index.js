@@ -16,12 +16,6 @@ const defaultItems = [
     [
         { type: 'heading', defaultValue: "Какими лекарствами лечат сахарный диабет", draggable: true, marginTop: 10 },
     ],
-    // [
-    //     { type: 'heading', defaultValue: 'Общие сведения', draggable: true, marginTop: 10 },
-    //     { type: 'text-area', defaultValue: 'Nostrud dolore eiusmod dolore ea incididunt. In Lorem fugiat mollit pariatur ipsum occaecat cupidatat. Et sint aliquip occaecat ad anim ipsum exercitation in tempor mollit ipsum.', draggable: true, wysiwyg: true, marginTop: 10 },
-    //     { type: 'list', defaultValue: ['Диабет 1ого типа', 'Диабет 2ого типа', 'Некоторые редкие типы'], draggable: true, wysiwyg: true, marginTop: 10 },
-    //     { type: 'spoiler', defaultValue: ['Диабет 1ого типа', 'Nostrud dolore eiusmod dolore ea incididunt. In Lorem fugiat mollit pariatur ipsum occaecat cupidatat. Et sint aliquip occaecat ad anim ipsum exercitation in tempor mollit ipsum.'], draggable: true, wysiwyg: true, marginTop: 10 },
-    // ],
 ];
 
 const reorder = (list, startIndex, endIndex) => {
@@ -31,6 +25,24 @@ const reorder = (list, startIndex, endIndex) => {
 
     return result;
 };
+
+const clean = list => {
+    return list.filter(arr => arr.length !== 0)
+}
+
+const getGroupIndex = (list, index) => {
+    const indexes = []
+
+    for (let i = 0; i < list.length; i++) {
+        if (Array.isArray(list[i - 1])) {
+            indexes.push(list[i - 1].length + indexes[i - 1] + 1)
+        } else {
+            indexes.push(0)
+        }
+    }
+
+    return indexes.indexOf(index)
+}
 
 export default class ConstructorForm extends Component {
     constructor(props) {
@@ -83,7 +95,6 @@ export default class ConstructorForm extends Component {
 
         let min = 0;
         let man = 0;
-        let myn = 0;
 
         for (let i = 0; i < groupMin; i++) {
             if (Array.isArray(this.state.items[i])) {
@@ -93,11 +104,6 @@ export default class ConstructorForm extends Component {
         for (let i = 0; i < groupMan; i++) {
             if (Array.isArray(this.state.items[i])) {
                 man += this.state.items[i].length
-            };
-        }
-        for (let i = 0; i <= groupMin; i++) {
-            if (Array.isArray(this.state.items[i])) {
-                myn += this.state.items[i].length
             };
         }
 
@@ -140,9 +146,11 @@ export default class ConstructorForm extends Component {
             items = reorder(
                 this.state.items,
                 data.source.index - min,
-                data.destination.index - myn
+                getGroupIndex(this.state.items, data.destination.index)
             );
         }
+
+        items = clean(items);
 
         this.setState({
             ...this.state,
@@ -152,7 +160,6 @@ export default class ConstructorForm extends Component {
 
     render() {
         return (
-            // TODO: Нужно завязаться на данные про порядок блоков с сервера, пока данные не готовы - хардкожу
             <DragDropContext
                 onDragEnd={this.onDragEnd}
             >
